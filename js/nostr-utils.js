@@ -177,6 +177,13 @@ function hexToBytes(hex) {
     // return data as an array of events
     return Object.keys(events).map((id) => events[id])
   }
+
+  const sendAllEvents = async (relay, data, relayStatus, ws) => {
+    console.log("Sending:", data.length, " events")
+    for (evnt of data) {
+      ws.send(JSON.stringify(['EVENT', evnt]))
+    }
+  }
   
   // send events to a relay, returns a promisse
   const sendToRelay = async (relay, data, relayStatus) =>
@@ -195,15 +202,14 @@ function hexToBytes(hex) {
         // fetch events from relay
         ws.onopen = () => {
           updateRelayStatus(relay, "Sending", 0, relayStatus)
-          for (evnt of data) {
-            clearTimeout(myTimeout)
-            myTimeout = setTimeout(() => {
-              ws.close()
-              reject('timeout')
-            }, 10_000)
 
-            ws.send(JSON.stringify(['EVENT', evnt]))
-          }
+          clearTimeout(myTimeout)
+          myTimeout = setTimeout(() => {
+            ws.close()
+            reject('timeout')
+          }, 10_000)
+
+          sendAllEvents(relay, data, relayStatus, ws)
         }
         // Listen for messages
         ws.onmessage = (event) => {
@@ -222,6 +228,8 @@ function hexToBytes(hex) {
             } else {
               console.log(event.data)
             }
+          } else {
+            console.log(event.data)
           }
         }
         ws.onerror = (err) => {
@@ -232,6 +240,7 @@ function hexToBytes(hex) {
         }
         ws.onclose = (socket, event) => {
           updateRelayStatus(relay, "Done", 0, relayStatus)
+          console.log("OnClose", relayStatus)
           resolve()
         }
       } catch (exception) {
