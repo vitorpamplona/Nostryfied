@@ -106,7 +106,7 @@ if (window.nostr) {
 const justBroadcast = async (fileName) => {
   const reader = new FileReader();
   reader.addEventListener('load', (event) => {
-    var data = JSON.parse(event.target.result.substring(13))
+    var data = JSON.parse(event.target.result)
     broadcast(data)
   });
   reader.readAsText(fileName)
