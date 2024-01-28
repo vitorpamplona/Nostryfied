@@ -18,6 +18,8 @@ const fetchAndBroadcast = async () => {
   }
   $('#checking-relays-header').text("Waiting for Relays: ")
   // parse pubkey ('npub' or hexa)
+  const relaySet = parseRelaySet($('#relaySet').val())
+  console.log(relaySet, $('#relaySet').val())
   const pubkey = parsePubkey($('#pubkey').val())
   if (!pubkey) return
   // disable button (will be re-enable at the end of the process)
@@ -35,7 +37,7 @@ const fetchAndBroadcast = async () => {
 
   // get all events from relays
   const filters =[{ authors: [pubkey] }, { "#p": [pubkey] }]
-  const data = (await getEvents(filters, pubkey)).sort((a, b) => b.created_at - a.created_at)
+  const data = (await getEvents(filters, pubkey, relaySet)).sort((a, b) => b.created_at - a.created_at)
 
   // inform user fetching is done
   $('#fetching-status').html(txt.fetching + checkMark)

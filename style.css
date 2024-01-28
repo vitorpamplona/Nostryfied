@@ -214,6 +214,28 @@ h2 {
 
 
 
+#relaySet {
+  width: 600px !important;
+}
+
+@media screen and (max-width: 1080px) {
+  #relaySet {
+    width: 450px !important;
+  }
+}
+@media screen and (max-width: 800px) {
+  #relaySet {
+    width: 350px !important;
+  }
+}
+@media screen and (max-width: 600px) {
+  #relaySet {
+    width: 250px !important;
+  }
+}
+
+
+
 
 
 main div p img {

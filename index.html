@@ -51,6 +51,24 @@
           <div>
             <form>
               <div class="space-between-small">
+                <div class="space-between">
+                  <b>From Relays</b>
+                </div>
+              </div>
+
+              <div class="space-between-small">
+                <p>
+                  <input
+                    type="text"
+                    id="relaySet"
+                    name="relaySet"
+                    placeholder="wss://nos.lol"
+                    style="width: 180px"
+                    value="" />
+                </p>
+              </div>
+
+              <div class="space-between-small">
                 <p>
                   <input
                     type="text"
@@ -101,6 +119,22 @@
             }
             
             #pubkey::placeholder {
+              color: #999;
+            }
+
+            #relaySet {
+              width: 600px; /* change width value */
+              font-size: 16px;
+              padding: 5px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              box-sizing: border-box;
+              max-width: 100%;
+              margin: 0 auto;
+              display: block;
+            }
+            
+            #relaySet::placeholder {
               color: #999;
             }
             </style>

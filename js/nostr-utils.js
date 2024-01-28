@@ -37,6 +37,15 @@ const hexa2npub = (hex) => {
 const parsePubkey = (pubkey) =>
   pubkey.match('npub1') ? npub2hexa(pubkey) : pubkey
 
+const parseRelaySet = (commaSeparatedRelayString) => {
+  let list = commaSeparatedRelayString.split(",")
+
+  if (list.length == 0) return undefined
+  if (list.length == 1 && list[0].trim() === "") return undefined
+  
+  return list
+}
+
 // download js file
 const downloadFile = (data, fileName) => {
   const prettyJs = 'const data = ' + JSON.stringify(data, null, 2)
@@ -242,12 +251,19 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
   })
 
 // query relays for events published by this pubkey
-const getEvents = async (filters, pubkey) => {
+const getEvents = async (filters, pubkey, relaySet) => {
   // events hash
   const events = {}
 
+  let myRelaySet = null
+  
+  if (relaySet.length > 0) 
+    myRelaySet = relaySet 
+  else 
+    myRelaySet = relays
+
   // batch processing of 10 relays
-  await processInPool(relays, (relay, poolStatus) => fetchFromRelay(relay, filters, pubkey, events, poolStatus), 10)
+  await processInPool(myRelaySet, (relay, poolStatus) => fetchFromRelay(relay, filters, pubkey, events, poolStatus), 10)
 
   displayRelayStatus({})
 
