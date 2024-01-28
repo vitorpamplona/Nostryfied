@@ -442,7 +442,7 @@ function sha256Hex(string) {
 async function signNostrAuthEvent(relay, auth_challenge) {
   try {
     let msg = {
-        kind: 22243, 
+        kind: 22242, 
         content: "",
         tags: [
           ["relay", relay],
