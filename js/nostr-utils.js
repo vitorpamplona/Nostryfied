@@ -213,7 +213,6 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
           signNostrAuthEvent(relay, subscriptionId).then(
             (event) => {
               if (event) {
-                console.log("AUTH", JSON.stringify(['EVENT', event]))
                 ws.send(JSON.stringify(['EVENT', event]))
               } else {
                 updateRelayStatus(relay, "AUTH Req", 0, undefined, relayStatus)
@@ -227,6 +226,17 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
               reject(relay)
             },
           ) 
+        }
+
+        if (msgType === 'CLOSED') {
+          subscriptions[subscriptionId].done = true
+        
+          let alldone = Object.values(subscriptions).every(filter => filter.done === true);
+          if (alldone) {
+            updateRelayStatus(relay, "Done", 0, undefined, relayStatus)
+            ws.close()
+            resolve(relay)
+          }
         }
 
         if (msgType === 'OK') {
