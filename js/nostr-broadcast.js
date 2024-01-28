@@ -34,7 +34,7 @@ const fetchAndBroadcast = async () => {
   $('#checking-relays-header').text("Waiting for Relays:")
 
   // get all events from relays
-  const filters =[{ authors: [pubkey] }, { "#p": [pubkey] }] 
+  const filters =[{ authors: [pubkey] }, { "#p": [pubkey] }]
   const data = (await getEvents(filters, pubkey)).sort((a, b) => b.created_at - a.created_at)
 
   // inform user fetching is done
@@ -42,25 +42,28 @@ const fetchAndBroadcast = async () => {
   $('#fetching-progress').val(relays.length)
 
   const latestKind3 = data.filter((it) => it.kind == 3 && it.pubkey === pubkey)[0]  
-  const myRelaySet = JSON.parse(latestKind3.content)
-  relays = Object.keys(myRelaySet).filter(url => myRelaySet[url].write).map(url => url)
 
-  $('#checking-relays-header-box').css('display', 'none')
-  $('#checking-relays-box').css('display', 'none')
-  // inform user that backup file (js format) is being downloaded
-  $('#file-download').html(txt.download)
-  downloadFile(data, 'nostr-backup.js')
-  // inform user that app is broadcasting events to relays
-  $('#broadcasting-status').html(txt.broadcasting)
-  // show and update broadcasting progress bar
-  $('#broadcasting-progress').css('visibility', 'visible')
-  $('#broadcasting-progress').prop('max', relays.length)
+  if (latestKind3) {
+    const myRelaySet = JSON.parse(latestKind3.content)
+    relays = Object.keys(myRelaySet).filter(url => myRelaySet[url].write).map(url => url)
   
-  $('#checking-relays-header-box').css('display', 'flex')
-  $('#checking-relays-box').css('display', 'flex')
-  $('#checking-relays-header').text("Broadcasting to Relays:")
-
-  await broadcastEvents(data)
+    $('#checking-relays-header-box').css('display', 'none')
+    $('#checking-relays-box').css('display', 'none')
+    // inform user that backup file (js format) is being downloaded
+    $('#file-download').html(txt.download)
+    downloadFile(data, 'nostr-backup.js')
+    // inform user that app is broadcasting events to relays
+    $('#broadcasting-status').html(txt.broadcasting)
+    // show and update broadcasting progress bar
+    $('#broadcasting-progress').css('visibility', 'visible')
+    $('#broadcasting-progress').prop('max', relays.length)
+    
+    $('#checking-relays-header-box').css('display', 'flex')
+    $('#checking-relays-box').css('display', 'flex')
+    $('#checking-relays-header').text("Broadcasting to Relays:")
+  
+    await broadcastEvents(data)
+  }
 
   // inform user that broadcasting is done
   $('#broadcasting-status').html(txt.broadcasting + checkMark)
@@ -83,9 +86,6 @@ if (window.nostr) {
   $('#fetch-and-broadcast').css('display', 'none')
   $('#get-from-extension').css('display', '')
 }
-
-
-
 
 // button click handler
 const justBroadcast = async (fileName) => {

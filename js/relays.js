@@ -5,10 +5,10 @@
 const fixedRelays = [
   'wss://atlas.nostr.land', // paid relay	15000	npub12262qa4uhw7u8gdwlgmntqtv7aye8vdcmvszkqwgs0zchel6mz7s6cgrkj
   'wss://bitcoiner.social', // paid relay	1000	npub1dxs2pygtfxsah77yuncsmu3ttqr274qr5g5zva3c7t5s3jtgy2xszsn4st
-  'wss://brb.io',
   'wss://eden.nostr.land', // paid relay	5000	npub16k7j4mwsqm8hakjl8x5ycrqmhx89lxkfwz2xxxcw75eav7sd8ztqy2rwdn
   'wss://expensive-relay.fiatjaf.com',
   'wss://freedom-relay.herokuapp.com',
+  'wss://relay.damus.io',
   'wss://nos.lol',
   'wss://a.nos.lol',
   'wss://nostr-2.zebedee.cloud',
@@ -30,6 +30,8 @@ const fixedRelays = [
   'wss://nostr.rocks',
   'wss://nostr.sandwich.farm',
   'wss://nostr.wine', // paid relay	8888	npub18kzz4lkdtc5n729kvfunxuz287uvu9f64ywhjz43ra482t2y5sks0mx5sz
+  'wss://filter.nostr.wine',
+  'wss://inbox.nostr.wine',
   'wss://nostr.zebedee.cloud',
   'wss://private.red.gb.net', // paid relay	8888	npub1nctdevxxuvth3sx6r0gutv4tmvhwy9syvpkr3gfd5atz67fl97kqyjkuxk
   'wss://puravida.nostr.land', // paid relay	10000	npub16k7j4mwsqm8hakjl8x5ycrqmhx89lxkfwz2xxxcw75eav7sd8ztqy2rwdn
@@ -56,4 +58,4 @@ var relays = []
 
 fetch("https://api.nostr.watch/v1/online")
      .then(response => response.json())
-     .then(json => relays = fixedRelays.concat(json));
+     .then(json => relays = [... new Set(fixedRelays.concat(json))] ); 

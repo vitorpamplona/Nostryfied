@@ -8,6 +8,10 @@ body {
   font-family: 'Red Hat Text', sans-serif;
 }
 
+.fullwidth {
+  width: 500px;
+}
+
 .container {
   text-align: center;
   color: var(--color);
