@@ -209,7 +209,6 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
         }
 
         if (msgType === 'AUTH') {
-          console.log(relay, subscriptionId)
           signNostrAuthEvent(relay, subscriptionId).then(
             (event) => {
               if (event) {
@@ -457,7 +456,6 @@ async function signNostrAuthEvent(relay, auth_challenge) {
     // Sign event
     signed_msg = await window.nostr.signEvent(msg);
   } catch (e) {
-    console.log(e)
     console.log("Failed to sign message with browser extension", e);
     return undefined;
   }
