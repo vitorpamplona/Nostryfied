@@ -229,8 +229,7 @@ const fetchFromRelay = async (relay, filters, addedFilters, pubkey, events, rela
           // Restarting the filter is necessary to go around Max Limits for each relay. 
           if (subscriptions[subscriptionId].counter < 2) { 
             subscriptions[subscriptionId].done = true
-            console.log(relay, subscriptionId, event.data) 
-
+            
             let alldone = Object.values(subscriptions).every(filter => filter.done === true);
             if (alldone) {
               updateRelayStatus(relay, "Done", 0, undefined, undefined, relayStatus)
