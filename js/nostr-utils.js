@@ -103,6 +103,8 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
       // open websocket
       const ws = new WebSocket(relay)
 
+      let isAuthenticating = false
+
       // prevent hanging forever
       let myTimeout = setTimeout(() => {
         ws.close()
@@ -119,8 +121,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
             lastEvent: null,
             done: false,
             filter: filter,
-            eventIds: new Set(), 
-            isAuthenticating: false
+            eventIds: new Set()
           }
         ]
       }))
@@ -210,7 +211,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
         }
 
         if (msgType === 'AUTH') {
-          subscriptions[subscriptionId].isAuthenticating = true
+          isAuthenticating = true
           signNostrAuthEvent(relay, subscriptionId).then(
             (event) => {
               if (event) {
@@ -229,7 +230,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
           ) 
         }
 
-        if (msgType === 'CLOSED' && !subscriptions[subscriptionId].isAuthenticating) {
+        if (msgType === 'CLOSED' && !isAuthenticating) {
           subscriptions[subscriptionId].done = true
         
           let alldone = Object.values(subscriptions).every(filter => filter.done === true);
@@ -241,7 +242,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
         }
 
         if (msgType === 'OK') {
-          subscriptions[subscriptionId].isAuthenticating = false
+          isAuthenticating = false
           // auth ok.
           for (const [key, sub] of Object.entries(subscriptions)) {
             ws.send(JSON.stringify(['REQ', sub.id, sub.filter]))
