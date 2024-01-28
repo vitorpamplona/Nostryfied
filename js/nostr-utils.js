@@ -142,8 +142,6 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
 
       // Listen for messages
       ws.onmessage = (event) => {
-        console.log("NEW Message", event)
-
         const [msgType, subscriptionId, data] = JSON.parse(event.data)
         // event messages
         if (msgType === 'EVENT') {
@@ -215,7 +213,6 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
           signNostrAuthEvent(relay, subscriptionId).then(
             (event) => {
               if (event) {
-                console.log("AUTH", JSON.stringify(['EVENT', event]))
                 ws.send(JSON.stringify(['AUTH', event]))
               } else {
                 updateRelayStatus(relay, "AUTH Req", 0, undefined, relayStatus)
