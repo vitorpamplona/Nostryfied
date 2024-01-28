@@ -210,9 +210,10 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
           console.log(relay, subscriptionId)
           signNostrAuthEvent(relay, subscriptionId).then(
             (event) => {
-              if (event) 
+              if (event) {
+                console.log("AUTH", JSON.stringify(['EVENT', event]))
                 ws.send(JSON.stringify(['EVENT', event]))
-              else {
+              } else {
                 updateRelayStatus(relay, "AUTH Req", 0, undefined, relayStatus)
                 ws.close()
                 reject(relay)
@@ -228,6 +229,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
 
         if (msgType === 'OK') {
           // auth ok.
+          console.log("AUTH", JSON.stringify(['EVENT', event]))
           for (const [key, sub] of Object.entries(subscriptions)) {
             ws.send(JSON.stringify(['REQ', sub.id, sub.filter]))
           }
