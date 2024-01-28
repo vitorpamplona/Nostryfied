@@ -207,6 +207,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
         }
 
         if (msgType === 'AUTH') {
+          console.log(relay, subscriptionId)
           signNostrAuthEvent(relay, subscriptionId).then(
             (event) => {
               if (event) 
@@ -257,7 +258,7 @@ const getEvents = async (filters, pubkey, relaySet) => {
 
   let myRelaySet = null
   
-  if (relaySet.length > 0) 
+  if (relaySet && relaySet.length > 0) 
     myRelaySet = relaySet 
   else 
     myRelaySet = relays
@@ -428,7 +429,7 @@ async function signNostrAuthEvent(relay, auth_challenge) {
         kind: 22243, // NIP-42++
         content: "",
         tags: [
-          ["relay", relay]
+          ["relay", relay],
           ["challenge", auth_challenge]
         ],
     };
