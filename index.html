@@ -39,44 +39,45 @@
     
     <main class="container">
       <div class="header-space">
-        <h1>Welcome to Nostryfied</h1>
+        <h1>Backup your Nostr Events</h1>
       </div>
-      <h2><b>Nostryfied</b> offers an <b>Broadcast & Export Service</b> that allows you to <b>Download a 
-        Copy of your Data</b> & when you use this service, all of your data will also be <b>Broadcasted to Major Relays</b> 
-         on the network. <br><br>This design ensures that the data is <b> Widely Distributed</b> 
-         and makes it more <b>Resistant to Censorship.</b>
-      </h2>
       <div>
         <form>
           <div>
             <form>
               <div class="space-between-small">
-                <div class="space-between">
-                  <b>From Relays</b>
-                </div>
-              </div>
-
-              <div class="space-between-small">
                 <p>
+                  From relays
                   <input
                     type="text"
+                    class="cool-field" 
                     id="relaySet"
                     name="relaySet"
-                    placeholder="Force relays or blank to use your list: wss://nos.lol"
-                    style="width: 180px"
-                    value="" />
+                    placeholder="wss://nos.lol, wss://nostr.mom or leave blank for all"
+                    value="wss://nos.lol" />
+                </p>
+              </div>
+
+              <div class="space-between-small-left">
+                <p>
+                  Created from
+                  <input type="date" class="cool-field" id="startDate" name="startDate" min="2020-01-01" value="2020-01-01"  />
+                  to
+                  <input type="date" class="cool-field" id="endDate" name="endDate" min="2020-01-01"  />
                 </p>
               </div>
 
               <div class="space-between-small">
                 <p>
+                  By and about
                   <input
                     type="text"
                     id="pubkey"
                     name="pubkey"
+                    class="cool-field" 
                     onchange="pubkeyOnChange()"
                     placeholder="Public key (npub or hex)"
-                    style="width: 180px"
+                    value=""
                     required />
                 </p>
               </div>
@@ -106,35 +107,15 @@
           </div>
           
           <style>
-            #pubkey {
-              width: 600px; /* change width value */
+            .cool-field {
               font-size: 16px;
               padding: 5px;
               border: 1px solid #ccc;
               border-radius: 4px;
               box-sizing: border-box;
-              max-width: 100%;
-              margin: 0 auto;
-              display: block;
             }
             
-            #pubkey::placeholder {
-              color: #999;
-            }
-
-            #relaySet {
-              width: 600px; /* change width value */
-              font-size: 16px;
-              padding: 5px;
-              border: 1px solid #ccc;
-              border-radius: 4px;
-              box-sizing: border-box;
-              max-width: 100%;
-              margin: 0 auto;
-              display: block;
-            }
-            
-            #relaySet::placeholder {
+            .cool-field::placeholder {
               color: #999;
             }
             </style>
@@ -198,52 +179,7 @@
           </p>
         </div>
       </div>
-      <div class="wrapper">
-        <div class="divider div-transparent"></div>
-        </div> 
-      <p>
-        <a href="https://formfaca.de/sm/t5B7tbyRB"
-          >Auto Backup (Wishlist)</a
-        >
-      </p> 
-      <div class="wrapper">
-        <div class="divider div-transparent"></div> 
-          <h4><b>Why you should Use this backup Service?</b></h1>
-        </div>
-        <h2>
-          Have you been using the new social network Nostr
-           that's <b>free, open, and not controlled</b> by the likes of Big Tech? 
-           If so, you might be wondering where your <b>data is stored and 
-           how you can get a copy of it.</b> Nostr is designed
-            with a <b>decentralized architecture</b> that stores your data on <b>multiple servers,</b>
-             making it more difficult for any one entity to control or access it. <br><br>
-            <b>Nostryfied</b> provides an <b>Export & Broadcast service</b> that allows you to <b>download a copy of your data,
-              & Broadcast it to all the major relays</b> although please note that this service is not a complete backup and might not
-               include all of your data.
-        </h4>
-        <p>
-          <a href="https://snort.social/p/npub1cmmswlckn82se7f2jeftl6ll4szlc6zzh8hrjyyfm9vm3t2afr7svqlr6f" class="linkbutton">Author</a>
-          <a href="https://snort.social/p/npub1ctpqas992k2ewy72f3qycnfveq8xewgx7kmyy9c8qcf2pjhzn33qauqp94" class="linkbutton">Support</a>
-        </p> 
-      </div>
-      <div class="wrapper">
-        <div class="divider div-transparent"></div> 
-          <h4><b>What is Nostr? How to get started</b></h1>
-        </div>
-        <h2>
-          <b>Notes and Other Stuff Transmitted by Relays</b> Nostr is a <b>relay-based network</b> that broadcasts your messages to multiple servers. 
-          This design helps to make the network more <b>resistant to censorship and also ensures 
-          that the network is distributed</b>, providing a higher level of <b>availability and reliability.</b> <br><br>
-          <b>NOSTR Lightning integrating</b> By integrating Bitcoin and Lightning into NOSTR, not only do users 
-          <b>unlock a decentralized way to transact funds,</b> but relays are also given a way to <b>monetize or control 
-          for denial-of-service (DOS) spam attacks.</b>
-        </h2>
-        <p>
-          <a href="https://nostr-resources.com/" class="linkbutton">Resources</a>&nbsp;&nbsp;
-          <a href="https://www.austrich.net/nostr/" class="linkbutton">Nostr Tools</a>
-        </p> 
-      </div>
-
+  
       <footer>
       <h5>
 
@@ -261,5 +197,14 @@
     <script src="js/nostr-utils.js"></script>
     <script src="js/relays.js"></script>
     <script src="js/nostr-broadcast.js"></script>
+    <script> 
+      Date.prototype.toDateInputValue = (function() {
+          var local = new Date(this);
+          local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+          return local.toJSON().slice(0,10);
+      });
+
+      document.getElementById('endDate').value = new Date().toDateInputValue()
+    </script>
   </body>
 </html>

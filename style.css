@@ -159,6 +159,11 @@ a {
   justify-content: center;
 }
 
+.space-between-small-left {
+  display: flex;
+  justify-content: left;
+}
+
 h2 {
   font-family: Arial,Helvetica Neue,Helvetica,sans-serif;
   font-size: 1em;
@@ -193,7 +198,7 @@ h2 {
 }
 
 #pubkey {
-  width: 600px !important;
+  width: 450px !important;
 }
 
 @media screen and (max-width: 1080px) {
@@ -215,7 +220,7 @@ h2 {
 
 
 #relaySet {
-  width: 600px !important;
+  width: 450px !important;
 }
 
 @media screen and (max-width: 1080px) {

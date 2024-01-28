@@ -48,9 +48,9 @@ const parseRelaySet = (commaSeparatedRelayString) => {
 
 // download js file
 const downloadFile = (data, fileName) => {
-  const prettyJs = 'const data = ' + JSON.stringify(data, null, 2)
+  const prettyJs = JSON.stringify(data, null, 2)
   const tempLink = document.createElement('a')
-  const taBlob = new Blob([prettyJs], { type: 'text/javascript' })
+  const taBlob = new Blob([prettyJs], { type: 'text/json' })
   tempLink.setAttribute('href', URL.createObjectURL(taBlob))
   tempLink.setAttribute('download', fileName)
   tempLink.click()
@@ -120,7 +120,7 @@ const displayRelayStatus = (relayStatusAndCount) => {
 }
 
 // fetch events from relay, returns a promise
-const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
+const fetchFromRelay = async (relay, filters, addedFilters, pubkey, events, relayStatus) =>
   new Promise((resolve, reject) => {
     try {
       updateRelayStatus(relay, "Starting", 0, undefined, undefined, relayStatus)
@@ -138,13 +138,22 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
       const subscriptions = Object.fromEntries(filters.map ( (filter, index) => {
         let id = "my-sub-"+index
 
+        let myFilter = filter
+
+        if (!myFilter.since && addedFilters.since) {
+          myFilter.since = addedFilters.since
+        }
+        if (!myFilter.until && addedFilters.until) {
+          myFilter.until = addedFilters.until
+        }
+
         return [ 
           id, {
             id: id,
             counter: 0,
             lastEvent: null,
             done: false,
-            filter: filter,
+            filter: myFilter,
             eventIds: new Set()
           }
         ]
@@ -177,6 +186,9 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
 
           try { 
             const { id } = data
+
+            if (addedFilters.since && data.created_at < addedFilters.since) return
+            if (addedFilters.until && data.created_at > addedFilters.until) return
 
             if (!subscriptions[subscriptionId].lastEvent || data.created_at < subscriptions[subscriptionId].lastEvent.created_at)
             subscriptions[subscriptionId].lastEvent = data
@@ -228,7 +240,9 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
           } else {
             //console.log("Limit: ", { ...filters[0], until: lastSub1Event.created_at })
             subscriptions[subscriptionId].counter = 0
-            ws.send(JSON.stringify(['REQ', subscriptions[subscriptionId].id, { ...subscriptions[subscriptionId].filter, until: subscriptions[subscriptionId].lastEvent.created_at } ]))
+            let newFilter = { ...subscriptions[subscriptionId].filter }
+            newFilter.until = subscriptions[subscriptionId].lastEvent.created_at
+            ws.send(JSON.stringify(['REQ', subscriptions[subscriptionId].id, newFilter]))
           }
         }
 
@@ -297,7 +311,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
   })
 
 // query relays for events published by this pubkey
-const getEvents = async (filters, pubkey, relaySet) => {
+const getEvents = async (filters, addedFilters, pubkey, relaySet) => {
   // events hash
   const events = {}
 
@@ -309,7 +323,7 @@ const getEvents = async (filters, pubkey, relaySet) => {
     myRelaySet = relays
 
   // batch processing of 10 relays
-  await processInPool(myRelaySet, (relay, poolStatus) => fetchFromRelay(relay, filters, pubkey, events, poolStatus), 10, (progress) => $('#fetching-progress').val(progress))
+  await processInPool(myRelaySet, (relay, poolStatus) => fetchFromRelay(relay, filters, addedFilters, pubkey, events, poolStatus), 10, (progress) => $('#fetching-progress').val(progress))
 
   displayRelayStatus({})
 
@@ -319,7 +333,7 @@ const getEvents = async (filters, pubkey, relaySet) => {
 
 // broadcast events to list of relays
 const broadcastEvents = async (data) => {
-  await processInPool(relays, (relay, poolStatus) => sendToRelay(relay, data, poolStatus), 10, (progress) => $('#broadcasting-progress').val(progress))
+  const poolStatus = await processInPool(relays, (relay, poolStatus) => sendToRelay(relay, data, poolStatus), 10, (progress) => $('#broadcasting-progress').val(progress))
 
   displayRelayStatus(relayStatus)
 }
@@ -348,6 +362,8 @@ const processInPool = async (items, processItem, poolSize, onProgress) => {
   }
 
   await Promise.allSettled(Object.values(pool));
+
+  return poolStatus
 }
 
 const sendAllEvents = async (relay, data, relayStatus, ws) => {

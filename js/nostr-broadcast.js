@@ -36,7 +36,19 @@ const fetchAndBroadcast = async () => {
 
   // get all events from relays
   const filters =[{ authors: [pubkey] }, { "#p": [pubkey] }]
-  const data = (await getEvents(filters, pubkey, relaySet)).sort((a, b) => b.created_at - a.created_at)
+
+  let date = new Date();
+  let offset = date.getTimezoneOffset() * 60;
+
+  const startDate = Date.parse($('#startDate').val())
+  const endDate = Date.parse($('#endDate').val())
+
+  const addedFilters = {
+    since: Math.floor((startDate - startDate % 864e5) / 1000) + offset, // 0:00
+    until: Math.floor((endDate - endDate % 864e5 + 864e5 - 1) / 1000) + offset // 23:59
+  }
+
+  const data = (await getEvents(filters, addedFilters, pubkey, relaySet)).sort((a, b) => b.created_at - a.created_at)
 
   // inform user fetching is done
   $('#fetching-status').html(txt.fetching + checkMark)
@@ -44,15 +56,17 @@ const fetchAndBroadcast = async () => {
 
   const latestKind3 = data.filter((it) => it.kind == 3 && it.pubkey === pubkey)[0]  
 
+  $('#checking-relays-header-box').css('display', 'none')
+  $('#checking-relays-box').css('display', 'none')
+  // inform user that backup file (js format) is being downloaded
+
+  $('#file-download').html(txt.download)
+  downloadFile(data, 'nostr-backup.json')
+
   if (latestKind3) {
     const myRelaySet = JSON.parse(latestKind3.content)
     relays = Object.keys(myRelaySet).filter(url => myRelaySet[url].write).map(url => url)
-  
-    $('#checking-relays-header-box').css('display', 'none')
-    $('#checking-relays-box').css('display', 'none')
-    // inform user that backup file (js format) is being downloaded
-    $('#file-download').html(txt.download)
-    downloadFile(data, 'nostr-backup.js')
+
     // inform user that app is broadcasting events to relays
     $('#broadcasting-status').html(txt.broadcasting)
     // show and update broadcasting progress bar
