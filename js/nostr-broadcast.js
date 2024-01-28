@@ -16,7 +16,7 @@ const fetchAndBroadcast = async () => {
     fetching: 'Fetching from relays... ',
     download: `Downloading Backup file... ${checkMark}`,
   }
-  $('#checking-relays-header').text("Waiting for Relays: ")
+
   // parse pubkey ('npub' or hexa)
   const relaySet = parseRelaySet($('#relaySet').val())
   const pubkey = parsePubkey($('#pubkey').val())
@@ -32,7 +32,7 @@ const fetchAndBroadcast = async () => {
 
   $('#checking-relays-header-box').css('display', 'flex')
   $('#checking-relays-box').css('display', 'flex')
-  $('#checking-relays-header').text("Waiting for Relays:")
+  $('#checking-relays-header').html("<th>Relay</th><th>Status</th><th>From Key</th><th>About Key</th><th>Events</th>")
 
   // get all events from relays
   const filters =[{ authors: [pubkey] }, { "#p": [pubkey] }]
@@ -61,7 +61,7 @@ const fetchAndBroadcast = async () => {
     
     $('#checking-relays-header-box').css('display', 'flex')
     $('#checking-relays-box').css('display', 'flex')
-    $('#checking-relays-header').text("Broadcasting to Relays:")
+    $('#checking-relays-header').html("<th>Relay</th><th>Status</th><th>From Key</th><th>About Key</th><th>Events</th>")
   
     await broadcastEvents(data)
   }
@@ -142,7 +142,7 @@ const broadcast = async (data) => {
   
   $('#checking-relays-header-box').css('display', 'flex')
   $('#checking-relays-box').css('display', 'flex')
-  $('#checking-relays-header').text("Broadcasting to Relays:")
+  $('#checking-relays-header').html("<th>Relay</th><th>Status</th><th>From Key</th><th>About Key</th><th>Events</th>")
 
   await broadcastEvents(data)
 

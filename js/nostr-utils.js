@@ -86,13 +86,21 @@ const displayRelayStatus = (relayStatusAndCount) => {
         let untilStr = "";
 
         if (relayStatusAndCount[it].until) {
-          Object.keys(relayStatusAndCount[it].until).forEach(subId => {
-            untilStr += "<td> <" + new Date(relayStatusAndCount[it].until[subId] * 1000).toLocaleDateString("en-US") + "</td>"
-          })
+          if (relayStatusAndCount[it].until["my-sub-0"])
+            untilStr += "<td> <" + new Date(relayStatusAndCount[it].until["my-sub-0"] * 1000).toLocaleDateString("en-US") + "</td>"
+          else
+            untilStr += "<td> </td>"
+
+          if (relayStatusAndCount[it].until["my-sub-1"])
+            untilStr += "<td> <" + new Date(relayStatusAndCount[it].until["my-sub-1"] * 1000).toLocaleDateString("en-US") + "</td>"
+          else
+            untilStr += "<td> </td>"
+        } else {
+          untilStr += "<td> </td> <td> </td>"
         }
           
         const relayName = it.replace("wss://", "").replace("ws://", "")  
-        const line = "<td>" + relayName + "</td><td>" + relayStatusAndCount[it].status + "</td><td>" + untilStr + "</td><td>" + relayStatusAndCount[it].count + "</td>"
+        const line = "<td>" + relayName + "</td><td>" + relayStatusAndCount[it].status + "</td>" + untilStr + "<td>" + relayStatusAndCount[it].count + "</td>"
 
         const elemId = relayName.replaceAll(".", "-")
 
@@ -301,7 +309,7 @@ const getEvents = async (filters, pubkey, relaySet) => {
     myRelaySet = relays
 
   // batch processing of 10 relays
-  await processInPool(myRelaySet, (relay, poolStatus) => fetchFromRelay(relay, filters, pubkey, events, poolStatus), 10)
+  await processInPool(myRelaySet, (relay, poolStatus) => fetchFromRelay(relay, filters, pubkey, events, poolStatus), 10, (progress) => $('#fetching-progress').val(progress))
 
   displayRelayStatus({})
 
@@ -309,7 +317,14 @@ const getEvents = async (filters, pubkey, relaySet) => {
   return Object.keys(events).map((id) => events[id])
 }
 
-const processInPool = async (items, processItem, poolSize) => {
+// broadcast events to list of relays
+const broadcastEvents = async (data) => {
+  await processInPool(relays, (relay, poolStatus) => sendToRelay(relay, data, poolStatus), 10, (progress) => $('#broadcasting-progress').val(progress))
+
+  displayRelayStatus(relayStatus)
+}
+
+const processInPool = async (items, processItem, poolSize, onProgress) => {
   let pool = {};
   let poolStatus = {}
   let remaining = [...items]
@@ -329,7 +344,7 @@ const processInPool = async (items, processItem, poolSize) => {
       }
     }
 
-    $('#fetching-progress').val(items.length - remaining.length)
+    onProgress(items.length - remaining.length)
   }
 
   await Promise.allSettled(Object.values(pool));
@@ -410,20 +425,6 @@ const sendToRelay = async (relay, data, relayStatus) =>
       reject(exception)
     }
   })
-
-// broadcast events to list of relays
-const broadcastEvents = async (data) => {
-  // batch processing of 10 relays
-  let broadcastFunctions = [...relays]
-  let relayStatus = {}
-  while (broadcastFunctions.length) {
-    let relaysForThisRound = broadcastFunctions.splice(0, 10)
-    $('#broadcasting-progress').val(relays.length - broadcastFunctions.length)
-    await Promise.allSettled( relaysForThisRound.map((relay) => sendToRelay(relay, data, relayStatus)) )
-  }
-
-  displayRelayStatus(relayStatus)
-}
 
 async function generateNostrEventId(msg) {
   const digest = [
