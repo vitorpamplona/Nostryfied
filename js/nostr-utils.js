@@ -440,10 +440,13 @@ async function signNostrAuthEvent(relay, auth_challenge) {
     // Generate event id
     msg.id = await generateNostrEventId(msg);
 
+    console.log(msg)
+
     // Sign event
     signed_msg = await window.nostr.signEvent(msg);
 
   } catch (e) {
+    console.log(e)
     console.log("Failed to sign message with browser extension", e);
     return undefined;
   }
