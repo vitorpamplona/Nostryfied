@@ -225,6 +225,13 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
             },
           ) 
         }
+
+        if (msgType === 'OK') {
+          // auth ok.
+          for (const [key, sub] of Object.entries(subscriptions)) {
+            ws.send(JSON.stringify(['REQ', sub.id, sub.filter]))
+          }
+        }
       }
       ws.onerror = (err) => {
         updateRelayStatus(relay, "Done", 0, undefined, relayStatus)
@@ -388,8 +395,6 @@ const broadcastEvents = async (data) => {
   displayRelayStatus(relayStatus)
 }
 
-
-
 async function generateNostrEventId(msg) {
   const digest = [
       0,
@@ -429,8 +434,6 @@ async function signNostrAuthEvent(relay, auth_challenge) {
         ],
     };
 
-    console.log(msg)
-
     // set msg fields
     msg.created_at = Math.floor((new Date()).getTime() / 1000);
     msg.pubkey = await window.nostr.getPublicKey();
@@ -438,11 +441,8 @@ async function signNostrAuthEvent(relay, auth_challenge) {
     // Generate event id
     msg.id = await generateNostrEventId(msg);
 
-    console.log(msg)
-
     // Sign event
     signed_msg = await window.nostr.signEvent(msg);
-
   } catch (e) {
     console.log(e)
     console.log("Failed to sign message with browser extension", e);
