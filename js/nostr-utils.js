@@ -216,7 +216,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
             (event) => {
               if (event) {
                 console.log("AUTH", JSON.stringify(['EVENT', event]))
-                ws.send(JSON.stringify(['EVENT', event]))
+                ws.send(JSON.stringify(['AUTH', event]))
               } else {
                 updateRelayStatus(relay, "AUTH Req", 0, undefined, relayStatus)
                 ws.close()
