@@ -420,19 +420,16 @@ function sha256Hex(string) {
 
 async function signNostrAuthEvent(relay, auth_challenge) {
   try {
-
-    if (!window.nostr) {
-      throw "Nostr extension not loaded or available"
-    }
-
     let msg = {
-        kind: 22243, // NIP-42++
+        kind: 22243, 
         content: "",
         tags: [
           ["relay", relay],
           ["challenge", auth_challenge]
         ],
     };
+
+    console.log(msg)
 
     // set msg fields
     msg.created_at = Math.floor((new Date()).getTime() / 1000);
