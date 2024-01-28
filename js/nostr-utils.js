@@ -119,7 +119,8 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
             lastEvent: null,
             done: false,
             filter: filter,
-            eventIds: new Set()
+            eventIds: new Set(), 
+            isAuthenticating: false
           }
         ]
       }))
@@ -209,6 +210,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
         }
 
         if (msgType === 'AUTH') {
+          subscriptions[subscriptionId].isAuthenticating = true
           signNostrAuthEvent(relay, subscriptionId).then(
             (event) => {
               if (event) {
@@ -227,7 +229,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
           ) 
         }
 
-        if (msgType === 'CLOSED') {
+        if (msgType === 'CLOSED' && !subscriptions[subscriptionId].isAuthenticating) {
           subscriptions[subscriptionId].done = true
         
           let alldone = Object.values(subscriptions).every(filter => filter.done === true);
@@ -239,6 +241,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
         }
 
         if (msgType === 'OK') {
+          subscriptions[subscriptionId].isAuthenticating = false
           // auth ok.
           for (const [key, sub] of Object.entries(subscriptions)) {
             ws.send(JSON.stringify(['REQ', sub.id, sub.filter]))
