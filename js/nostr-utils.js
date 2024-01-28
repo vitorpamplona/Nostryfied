@@ -215,6 +215,7 @@ const fetchFromRelay = async (relay, filters, pubkey, events, relayStatus) =>
           signNostrAuthEvent(relay, subscriptionId).then(
             (event) => {
               if (event) {
+                console.log("AUTH", JSON.stringify(['EVENT', event]))
                 ws.send(JSON.stringify(['EVENT', event]))
               } else {
                 updateRelayStatus(relay, "AUTH Req", 0, undefined, relayStatus)
