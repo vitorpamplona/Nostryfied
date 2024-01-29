@@ -105,7 +105,7 @@ progress[value="75"]::-webkit-progress-value {
 
 
 p {
-  max-width: 52ch;
+  max-width: 80ch;
   line-height: 1.5;
   padding: .3em;
   margin-top: 5px;
@@ -162,6 +162,7 @@ a {
 .space-between-small-left {
   display: flex;
   justify-content: left;
+  text-align: left;
 }
 
 h2 {
@@ -220,7 +221,7 @@ h2 {
 
 
 #relaySet {
-  width: 450px !important;
+  width: 550px !important;
 }
 
 @media screen and (max-width: 1080px) {
@@ -241,7 +242,7 @@ h2 {
 
 
 #relaySetBroadcast {
-  width: 450px !important;
+  width: 550px !important;
 }
 
 @media screen and (max-width: 1080px) {

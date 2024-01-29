@@ -45,7 +45,7 @@
         <form>
           <div>
             <form>
-              <div class="space-between-small">
+              <div class="space-between-small-left">
                 <p>
                   From relays
                   <input
@@ -66,7 +66,7 @@
                 </p>
               </div>
 
-              <div class="space-between-small">
+              <div class="space-between-small-left">
                 <p>
                   By and about
                   <input
@@ -77,6 +77,13 @@
                     onchange="pubkeyOnChange()"
                     placeholder="Public key (npub or hex)"
                     required />
+
+                    <button
+                    id="get-from-extension"
+                    onclick="getFromExtension(); return false;"
+                    style="">
+                    Get from extension
+                  </button>
                 </p>
               </div>
               <div class="space-between-small">
@@ -102,7 +109,7 @@
                 </div>
               </div>
 
-              <div class="space-between-small">
+              <div class="space-between-small-left">
                 <p>
                   To relays
                   <input
@@ -141,12 +148,6 @@
                 onclick="justBroadcast(fileName); return false;" 
                 style="display: none">
                 Broadcast from File
-              </button>
-              <button
-                id="get-from-extension"
-                onclick="getFromExtension(); return false;"
-                style="display: none">
-                Get from extension
               </button>
             </p>
           </div>

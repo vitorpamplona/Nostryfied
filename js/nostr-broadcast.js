@@ -98,7 +98,6 @@ const getFromExtension = async () => {
 
 const pubkeyOnChange = () => {
   $('#fetch-and-broadcast').css('display', '')
-  $('#get-from-extension').css('display', 'none')
 }
 
 if (window.nostr) {
