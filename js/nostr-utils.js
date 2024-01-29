@@ -37,13 +37,13 @@ const hexa2npub = (hex) => {
 const parsePubkey = (pubkey) =>
   pubkey.match('npub1') ? npub2hexa(pubkey) : pubkey
 
-const parseRelaySet = (commaSeparatedRelayString) => {
+const parseRelaySet = (commaSeparatedRelayString, defaultSet) => {
   let list = commaSeparatedRelayString.split(",")
-
-  if (list.length == 0) return undefined
-  if (list.length == 1 && list[0].trim() === "") return undefined
   
-  return list
+  if (list && list.length > 0 && list[0] !== "") 
+    return list.map((it) => it.trim())
+  else 
+    return defaultSet
 }
 
 // download js file
@@ -110,7 +110,7 @@ const displayRelayStatus = (relayStatusAndCount) => {
         const relayName = it.replace("wss://", "").replace("ws://", "")  
         const line = "<td>" + relayName + "</td><td>" + relayStatusAndCount[it].status + "</td>" + untilStr + "<td>" + relayStatusAndCount[it].count + "</td>" + "<td>" + msg + "</td>"
 
-        const elemId = relayName.replaceAll(".", "-")
+        const elemId = relayName.replaceAll(".", "")
 
         if ($('#' + elemId).length > 0) {
           $('#' + elemId).html(line)
@@ -322,15 +322,8 @@ const getEvents = async (filters, addedFilters, pubkey, relaySet) => {
   // events hash
   const events = {}
 
-  let myRelaySet = null
-  
-  if (relaySet && relaySet.length > 0) 
-    myRelaySet = relaySet 
-  else 
-    myRelaySet = relays
-
   // batch processing of 10 relays
-  await processInPool(myRelaySet, (relay, poolStatus) => fetchFromRelay(relay, filters, addedFilters, pubkey, events, poolStatus), 10, (progress) => $('#fetching-progress').val(progress))
+  await processInPool(relaySet, (relay, poolStatus) => fetchFromRelay(relay, filters, addedFilters, pubkey, events, poolStatus), 10, (progress) => $('#fetching-progress').val(progress))
 
   displayRelayStatus({})
 
@@ -339,10 +332,10 @@ const getEvents = async (filters, addedFilters, pubkey, relaySet) => {
 }
 
 // broadcast events to list of relays
-const broadcastEvents = async (data) => {
-  const poolStatus = await processInPool(relays, (relay, poolStatus) => sendToRelay(relay, data, poolStatus), 10, (progress) => $('#broadcasting-progress').val(progress))
+const broadcastEvents = async (data, relaySet) => {
+  const poolStatus = await processInPool(relaySet, (relay, poolStatus) => sendToRelay(relay, data, poolStatus), 10, (progress) => $('#broadcasting-progress').val(progress))
 
-  displayRelayStatus(relayStatus)
+  displayRelayStatus(poolStatus)
 }
 
 const processInPool = async (items, processItem, poolSize, onProgress) => {
@@ -426,6 +419,25 @@ const sendToRelay = async (relay, data, relayStatus) =>
           }
         } else {
           console.log(relay, event.data)
+        }
+
+        if (msgType === 'AUTH') {
+          signNostrAuthEvent(relay, subscriptionId).then(
+            (event) => {
+              if (event) {
+                ws.send(JSON.stringify(['AUTH', event]))
+              } else {
+                updateRelayStatus(relay, "AUTH Req", 0, undefined, undefined, relayStatus)
+                ws.close()
+                reject(relay)
+              }
+            },
+            (reason) => {
+              updateRelayStatus(relay, "AUTH Req", 0, undefined, undefined, relayStatus)
+              ws.close()
+              reject(relay)
+            },
+          ) 
         }
       }
       ws.onerror = (err) => {

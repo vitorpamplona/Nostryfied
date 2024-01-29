@@ -54,8 +54,8 @@ const fixedRelays = [
   'wss://relay.nostr.band'
 ]
 
-var relays = []
+var allAvailableRelays = []
 
 fetch("https://api.nostr.watch/v1/online")
      .then(response => response.json())
-     .then(json => relays = [... new Set(fixedRelays.concat(json))] ); 
+     .then(json => allAvailableRelays = [... new Set(fixedRelays.concat(json))] ); 

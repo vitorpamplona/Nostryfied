@@ -240,6 +240,26 @@ h2 {
 }
 
 
+#relaySetBroadcast {
+  width: 450px !important;
+}
+
+@media screen and (max-width: 1080px) {
+  #relaySetBroadcast {
+    width: 450px !important;
+  }
+}
+@media screen and (max-width: 800px) {
+  #relaySetBroadcast {
+    width: 350px !important;
+  }
+}
+@media screen and (max-width: 600px) {
+  #relaySetBroadcast {
+    width: 250px !important;
+  }
+}
+
 
 
 
