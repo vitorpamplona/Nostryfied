@@ -115,7 +115,7 @@ const displayRelayStatus = (relayStatusAndCount) => {
     )
   } else {
     $('#checking-relays-header').html("")
-    $('#checking-relays').html("")
+    $('#checking-relays').html("<tr id=\"checking-relays-header\"></tr>")
   }
 }
 

@@ -73,9 +73,12 @@ const fetchAndBroadcast = async () => {
     $('#broadcasting-progress').css('visibility', 'visible')
     $('#broadcasting-progress').prop('max', relays.length)
     
+    $('#checking-relays-header').html("")
+    $('#checking-relays').html("<tr id=\"checking-relays-header\"></tr>")
+
     $('#checking-relays-header-box').css('display', 'flex')
     $('#checking-relays-box').css('display', 'flex')
-    $('#checking-relays-header').html("<th>Relay</th><th>Status</th><th>From Key</th><th>About Key</th><th>Events</th>")
+    $('#checking-relays-header').html("<th>Relay</th><th>Status</th><th></th><th></th><th>Events</th>")
   
     await broadcastEvents(data)
   }
@@ -156,7 +159,7 @@ const broadcast = async (data) => {
   
   $('#checking-relays-header-box').css('display', 'flex')
   $('#checking-relays-box').css('display', 'flex')
-  $('#checking-relays-header').html("<th>Relay</th><th>Status</th><th>From Key</th><th>About Key</th><th>Events</th>")
+  $('#checking-relays-header').html("<th>Relay</th><th>Status</th><th></th><th></th><th>Events</th>")
 
   await broadcastEvents(data)
 
