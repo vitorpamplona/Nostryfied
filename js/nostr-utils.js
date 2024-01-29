@@ -422,7 +422,7 @@ const sendToRelay = async (relay, data, relayStatus) =>
             updateRelayStatus(relay, undefined, 1, undefined, undefined, message, relayStatus)
           } else {
             updateRelayStatus(relay, undefined, 0, undefined, undefined, message, relayStatus)
-            console.log(relay, event.data)
+            //console.log(relay, event.data)
           }
         } else {
           console.log(relay, event.data)
