@@ -56,7 +56,7 @@ const downloadFile = (data, fileName) => {
   tempLink.click()
 }
 
-const updateRelayStatus = (relay, status, addToCount, subscription, until, relayStatusAndCount) => {
+const updateRelayStatus = (relay, status, addToCount, subscription, until, message, relayStatusAndCount) => {
   if (relayStatusAndCount[relay] == undefined) {
     relayStatusAndCount[relay] = {}
   }
@@ -70,6 +70,9 @@ const updateRelayStatus = (relay, status, addToCount, subscription, until, relay
 
   if (subscription)
     relayStatusAndCount[relay].until[subscription] = until
+
+  if (message)
+    relayStatusAndCount[relay].message = message
 
   if (relayStatusAndCount[relay].count != undefined) 
     relayStatusAndCount[relay].count = relayStatusAndCount[relay].count + addToCount
@@ -98,9 +101,14 @@ const displayRelayStatus = (relayStatusAndCount) => {
         } else {
           untilStr += "<td> </td> <td> </td>"
         }
+
+        let msg = ""
+
+        if (relayStatusAndCount[it].message)
+          msg = relayStatusAndCount[it].message
           
         const relayName = it.replace("wss://", "").replace("ws://", "")  
-        const line = "<td>" + relayName + "</td><td>" + relayStatusAndCount[it].status + "</td>" + untilStr + "<td>" + relayStatusAndCount[it].count + "</td>"
+        const line = "<td>" + relayName + "</td><td>" + relayStatusAndCount[it].status + "</td>" + untilStr + "<td>" + relayStatusAndCount[it].count + "</td>" + "<td>" + msg + "</td>"
 
         const elemId = relayName.replaceAll(".", "-")
 
@@ -123,7 +131,7 @@ const displayRelayStatus = (relayStatusAndCount) => {
 const fetchFromRelay = async (relay, filters, addedFilters, pubkey, events, relayStatus) =>
   new Promise((resolve, reject) => {
     try {
-      updateRelayStatus(relay, "Starting", 0, undefined, undefined, relayStatus)
+      updateRelayStatus(relay, "Starting", 0, undefined, undefined, undefined, relayStatus)
       // open websocket
       const ws = new WebSocket(relay)
 
@@ -166,7 +174,7 @@ const fetchFromRelay = async (relay, filters, addedFilters, pubkey, events, rela
           ws.close()
           reject(relay)
         }, 10_000)
-        updateRelayStatus(relay, "Downloading", 0, undefined, undefined, relayStatus)
+        updateRelayStatus(relay, "Downloading", 0, undefined, undefined, undefined, relayStatus)
         
         for (const [key, sub] of Object.entries(subscriptions)) {
           ws.send(JSON.stringify(['REQ', sub.id, sub.filter]))
@@ -210,7 +218,7 @@ const fetchFromRelay = async (relay, filters, addedFilters, pubkey, events, rela
                 until = subscriptions[subscriptionId].lastEvent.created_at
             }
 
-            updateRelayStatus(relay, undefined, 1, subscriptionId, until, relayStatus)
+            updateRelayStatus(relay, undefined, 1, subscriptionId, until, undefined, relayStatus)
 
             // prevent duplicated events
             if (events[id]) return
@@ -232,7 +240,7 @@ const fetchFromRelay = async (relay, filters, addedFilters, pubkey, events, rela
             
             let alldone = Object.values(subscriptions).every(filter => filter.done === true);
             if (alldone) {
-              updateRelayStatus(relay, "Done", 0, undefined, undefined, relayStatus)
+              updateRelayStatus(relay, "Done", 0, undefined, undefined, undefined, relayStatus)
               ws.close()
               resolve(relay)
             }
@@ -270,7 +278,7 @@ const fetchFromRelay = async (relay, filters, addedFilters, pubkey, events, rela
         
           let alldone = Object.values(subscriptions).every(filter => filter.done === true);
           if (alldone) {
-            updateRelayStatus(relay, "Done", 0, undefined, undefined, relayStatus)
+            updateRelayStatus(relay, "Done", 0, undefined, undefined, undefined, relayStatus)
             ws.close()
             resolve(relay)
           }
@@ -285,7 +293,7 @@ const fetchFromRelay = async (relay, filters, addedFilters, pubkey, events, rela
         }
       }
       ws.onerror = (err) => {
-        updateRelayStatus(relay, "Done", 0, undefined, undefined, relayStatus)
+        updateRelayStatus(relay, "Done", 0, undefined, undefined, undefined, relayStatus)
         try {
           ws.close()
           reject(relay)
@@ -294,12 +302,12 @@ const fetchFromRelay = async (relay, filters, addedFilters, pubkey, events, rela
         }
       }
       ws.onclose = (socket, event) => {
-        updateRelayStatus(relay, "Done", 0, undefined, undefined, relayStatus)
+        updateRelayStatus(relay, "Done", 0, undefined, undefined, undefined, relayStatus)
         resolve(relay)
       }
     } catch (exception) {
       console.log(exception)
-      updateRelayStatus(relay, "Error", 0, undefined, undefined, relayStatus)
+      updateRelayStatus(relay, "Error", 0, undefined, undefined, undefined, relayStatus)
       try {
         ws.close()
       } catch (exception) {
@@ -378,7 +386,7 @@ const sendToRelay = async (relay, data, relayStatus) =>
     try {
       const ws = new WebSocket(relay)
 
-      updateRelayStatus(relay, "Starting", 0, undefined, undefined, relayStatus)
+      updateRelayStatus(relay, "Starting", 0, undefined, undefined, undefined, relayStatus)
 
       // prevent hanging forever
       let myTimeout = setTimeout(() => {
@@ -388,7 +396,7 @@ const sendToRelay = async (relay, data, relayStatus) =>
 
       // fetch events from relay
       ws.onopen = () => {
-        updateRelayStatus(relay, "Sending", 0, undefined, undefined, relayStatus)
+        updateRelayStatus(relay, "Sending", 0, undefined, undefined, undefined, relayStatus)
 
         clearTimeout(myTimeout)
         myTimeout = setTimeout(() => {
@@ -406,13 +414,14 @@ const sendToRelay = async (relay, data, relayStatus) =>
           reject('timeout')
         }, 10_000)
 
-        const [msgType, subscriptionId, inserted] = JSON.parse(event.data)
+        const [msgType, subscriptionId, inserted, message] = JSON.parse(event.data)
         // event messages
         // end of subscription messages
         if (msgType === 'OK') {
           if (inserted == true) {
-            updateRelayStatus(relay, undefined, 1, undefined, undefined, relayStatus)
+            updateRelayStatus(relay, undefined, 1, undefined, undefined, message, relayStatus)
           } else {
+            updateRelayStatus(relay, undefined, 0, undefined, undefined, message, relayStatus)
             console.log(relay, event.data)
           }
         } else {
@@ -420,19 +429,19 @@ const sendToRelay = async (relay, data, relayStatus) =>
         }
       }
       ws.onerror = (err) => {
-        updateRelayStatus(relay, "Error", 0, undefined, undefined, relayStatus)
+        updateRelayStatus(relay, "Error", 0, undefined, undefined, undefined, relayStatus)
         console.log("Error", err)
         ws.close()
         reject(err)
       }
       ws.onclose = (socket, event) => {
-        updateRelayStatus(relay, "Done", 0, undefined, undefined, relayStatus)
+        updateRelayStatus(relay, "Done", 0, undefined, undefined, undefined, relayStatus)
         console.log("OnClose", relayStatus)
         resolve()
       }
     } catch (exception) {
       console.log(exception)
-      updateRelayStatus(relay, "Error", 0, undefined, undefined, relayStatus)
+      updateRelayStatus(relay, "Error", 0, undefined, undefined, undefined, relayStatus)
       try {
         ws.close()
       } catch (exception) {
