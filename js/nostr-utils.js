@@ -110,7 +110,7 @@ const displayRelayStatus = (relayStatusAndCount) => {
         const relayName = it.replace("wss://", "").replace("ws://", "")  
         const line = "<td>" + relayName + "</td><td>" + relayStatusAndCount[it].status + "</td>" + untilStr + "<td>" + relayStatusAndCount[it].count + "</td>" + "<td>" + msg + "</td>"
 
-        const elemId = relayName.replaceAll(".", "")
+        const elemId = relayName.replaceAll(".", "").replaceAll("/", "-")
 
         if ($('#' + elemId).length > 0) {
           $('#' + elemId).html(line)
